@@ -45,12 +45,14 @@ def evaluate(model, path, iou_thres, conf_thres, nms_thres, img_size, batch_size
 
         with torch.no_grad():
             outputs = model(imgs)
+            # non_max_suppression_ version from ultralytics
             outputs = non_max_suppression_(outputs, conf_thres=conf_thres, nms_thres=nms_thres)
         sample_metrics += get_batch_statistics(outputs, targets, iou_threshold=iou_thres)
-        print(len(sample_metrics))
-    # Concatenate sample statistics
-    true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*sample_metrics))]
-    precision, recall, AP, f1, ap_class = ap_per_class(true_positives, pred_scores, pred_labels, labels)
+    # Concatenate sample statistics\
+    precision =  recall = AP = f1 = ap_class  = .0
+    if len(sample_metrics):
+        true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*sample_metrics))]
+        precision, recall, AP, f1, ap_class = ap_per_class(true_positives, pred_scores, pred_labels, labels)
 
     return precision, recall, AP, f1, ap_class
 
