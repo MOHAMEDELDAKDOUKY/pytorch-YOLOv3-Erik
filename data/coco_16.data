@@ -1,0 +1,7 @@
+classes=80
+main_dir = data/coco_16/
+train=./data/coco_16.txt
+valid=./data/coco_16.txt
+names=data/coco.names
+backup=backup/
+eval=coco
