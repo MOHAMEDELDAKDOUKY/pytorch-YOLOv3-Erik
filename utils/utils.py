@@ -245,11 +245,11 @@ def non_max_suppression(prediction, conf_thres=0.5, nms_thres=0.4):
         # Object confidence times class confidence
         score = image_pred[:, 4] * image_pred[:, 5:].max(1)[0]
         # Sort by it
-        #image_pred = image_pred[(-score).argsort()]
-        # class_confs, class_preds = image_pred[:, 5:].max(1, keepdim=True)
-        # detections = torch.cat((image_pred[:, :5], class_confs.float(), class_preds.float()), 1)
+        image_pred = image_pred[(-score).argsort()]
+        class_confs, class_preds = image_pred[:, 5:].max(1, keepdim=True)
+        detections = torch.cat((image_pred[:, :4], class_confs.float(), class_preds.float()), 1)
 
-        output[image_i] = image_pred[torchvision.ops.nms(image_pred[:, :4], score, nms_thres)]
+        output[image_i] = detections[torchvision.ops.nms(detections[:, :4], detections[:, 4], nms_thres)]
 
         # Perform non-maximum suppression
         # keep_boxes = []
