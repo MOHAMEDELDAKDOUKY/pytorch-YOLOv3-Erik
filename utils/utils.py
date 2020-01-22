@@ -52,7 +52,8 @@ def rescale_boxes(boxes, current_dim, original_shape):
 
 
 def xywh2xyxy(x):
-    y = x.new(x.shape)
+    #y = x.new(x.shape)
+    y = torch.zeros_like(x) if isinstance(x, torch.Tensor) else np.zeros_like(x)
     y[..., 0] = x[..., 0] - x[..., 2] / 2
     y[..., 1] = x[..., 1] - x[..., 3] / 2
     y[..., 2] = x[..., 0] + x[..., 2] / 2
@@ -461,3 +462,30 @@ def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
 
     tconf = obj_mask.float()
     return iou_scores, class_mask, obj_mask, noobj_mask, tx, ty, tw, th, tcls, tconf
+
+
+
+def plot_images(imgs, targets, paths=None, fname='images.jpg'):
+    # Plots training images overlaid with targets
+    imgs = imgs.cpu().numpy()
+    targets = targets.cpu().numpy()
+    # targets = targets[targets[:, 1] == 21]  # plot only one class
+
+    fig = plt.figure(figsize=(10, 10))
+    bs, _, h, w = imgs.shape  # batch size, _, height, width
+    bs = min(bs, 16)  # limit plot to 16 images
+    ns = np.ceil(bs ** 0.5)  # number of subplots
+
+    for i in range(bs):
+        boxes = xywh2xyxy(targets[targets[:, 0] == i, 2:6]).T
+        boxes[[0, 2]] *= w
+        boxes[[1, 3]] *= h
+        plt.subplot(ns, ns, i + 1).imshow(imgs[i].transpose(1, 2, 0))
+        plt.plot(boxes[[0, 2, 2, 0, 0]], boxes[[1, 1, 3, 3, 1]], '.-')
+        plt.axis('off')
+        if paths is not None:
+            s = Path(paths[i]).name
+            plt.title(s[:min(len(s), 40)], fontdict={'size': 8})  # limit to 40 characters
+    fig.tight_layout()
+    fig.savefig(fname, dpi=200)
+    plt.close()
