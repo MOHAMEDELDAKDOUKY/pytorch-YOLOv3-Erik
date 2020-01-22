@@ -248,7 +248,7 @@ def non_max_suppression(prediction, conf_thres=0.5, nms_thres=0.4):
         # class_confs, class_preds = image_pred[:, 5:].max(1, keepdim=True)
         # detections = torch.cat((image_pred[:, :5], class_confs.float(), class_preds.float()), 1)
 
-        output[image_i] = image_pred[torchvision.ops.boxes.batched_nms(image_pred[:, :4], score, nms_thres)]
+        output[image_i] = image_pred[torchvision.ops.nms(image_pred[:, :4], score, nms_thres)]
 
         # Perform non-maximum suppression
         # keep_boxes = []
