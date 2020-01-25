@@ -132,17 +132,13 @@ class ListDataset(Dataset):
         return img_path, img, targets
 
     def collate_fn(self, batch):
-        # edit form: https://github.com/eriklindernoren/PyTorch-YOLOv3/issues/243
         paths, imgs, targets = list(zip(*batch))
-        # Add sample index to targets
-        for i, boxes in enumerate(targets):
-            if boxes is None:
-                continue
-            boxes[:, 0] = i
         # Remove empty placeholder targets
         targets = [boxes for boxes in targets if boxes is not None]
+        # Add sample index to targets
+        for i, boxes in enumerate(targets):
+            boxes[:, 0] = i
         targets = torch.cat(targets, 0)
-
         # Selects new image size every tenth batch
         if self.multiscale and self.batch_count % 10 == 0:
             self.img_size = random.choice(range(self.min_size, self.max_size + 1, 32))
@@ -153,6 +149,3 @@ class ListDataset(Dataset):
 
     def __len__(self):
         return len(self.img_files)
-
-
-    def collate_fn(self, batch):
